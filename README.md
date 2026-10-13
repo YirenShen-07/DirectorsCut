@@ -1,32 +1,36 @@
 # Director’s Cut — Screenwriting Web Prototype
 
-A browser-based screenwriting prototype with screenplay formatting, starter templates, font controls, and text-to-speech playback.
+A browser-based screenplay editor with starter templates, formatting controls, local saving, notes, a scene outline, and browser text-to-speech.
 
-## User value
-Help writers draft screenplay elements and listen to text from the editor in one interface.
+![Editor](assets/editor.png)
 
-## Implemented features
-- Editable screenplay elements and formatting buttons.
-- Starter text for feature films, TV episodes, short films, and stage plays.
-- Font family and size controls.
-- Browser speech synthesis that reads the editor's text.
-- Basic document state and an unsaved-change prompt.
+## User workflow
+1. Choose Feature Film, TV Episode, Short Film or Stage Play, then edit the screenplay.
+2. Apply formatting to the current block or insert a screenplay element.
+3. Add notes and a script title. **Save** stores the document in this browser; choose it under Recent Scripts to restore it.
+4. **Download Backup** exports the current script and notes as JSON.
+5. **Play Dialogue / Stop Playback** controls browser text-to-speech.
+6. **Print / PDF** opens the browser print dialog; select Save as PDF where supported. This is browser printing, not a custom PDF-export engine.
 
-## Technology
-HTML, CSS, and JavaScript, using DOM events, editable elements, selection/caret APIs, and the browser Speech Synthesis API. Playback uses browser text-to-speech; it is not a generative voice model or character-specific voice system.
+[Example printed screenplay](assets/screenplay_demo.pdf) · [Mobile layout](assets/mobile.png) · [Short demo guide](DEMO.md)
 
 ## Run locally
-1. Clone this repository.
-2. Open [screenwriting.html](screenwriting.html) in a browser.
-3. Select a template or add formatted elements, edit the text, and use Play Dialogue.
+```bash
+git clone https://github.com/YirenShen-07/DirectorsCut.git
+cd DirectorsCut
+python -m http.server 8000
+```
+Open http://localhost:8000/screenwriting.html. Opening screenwriting.html directly also works in many browsers, but local-storage behavior for file URLs varies. No npm installation, API token or backend is required.
 
-Source: [script.js](script.js) · [styles.css](styles.css)
+## Technical strengths
+Vanilla HTML, CSS and JavaScript; editable DOM blocks, event handling, document state, unsaved-change prompts, localStorage persistence, safe text rendering, object-URL JSON downloads, print CSS and the browser Speech Synthesis API.
 
-## Prototype limitations
-- Save and PDF export currently display alerts; they do not persist or export a document.
-- Character-profile code exists, but its event binding is commented out.
-- Scene organization and character-specific voice selection are not established as working features.
-- Browser compatibility and a live hosted demo have not been verified.
+The former Tailwind CDN import was present in the source but is now removed; styling is self-contained. Unused character-profile code and placeholder scenes are removed. Scene navigation is generated from actual scene headings. There is no generative AI or character-specific voice model.
 
-## Project context and attribution
-Duke hackathon portfolio project. Document individual and team contributions before using team-level claims on a resume. No license file is currently included.
+## Verification and limits
+Save/reload, note persistence, JSON backup, templates, scene outline, print invocation and responsive layout are exercised by the maintenance verification. Automated speech checks verify API integration; audible playback depends on the browser and available voices.
+
+Saving is local to the browser and origin. Clearing browser storage removes saved scripts; the JSON download is a backup export, and importing it is not yet implemented. There is no cloud sync or collaboration service.
+
+## Attribution and license
+Original Duke hackathon project in Yiren Shen's portfolio. Individual team contributions have not been independently established and are not invented here. The 2026 maintenance pass adds working persistence and printing with AI assistance. No MIT or other license grant is claimed; a project license requires confirmation of ownership and team agreement.

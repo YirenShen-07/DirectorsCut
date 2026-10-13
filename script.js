@@ -1,310 +1,100 @@
-// Document state management
-let documentState = {
-    content: '',
-    currentFont: 'Courier New',
-    fontSize: '12pt',
-    isDirty: false,
-    characters: []
+// All saved screenplay data stays in this browser. No server is used.
+const KEY = 'directorsCutScriptsV1';
+const TYPES = new Set(['scene-heading','action','character','dialogue','parenthetical','transition']);
+const editor = document.querySelector('.script-page');
+const notes = document.querySelector('.notes-area');
+const title = document.querySelector('#script-title');
+const status = document.querySelector('#save-status');
+let documents = {}, currentId = null, dirty = false;
+const templates = {
+ 'feature-film': [['scene-heading','INT. COFFEE SHOP - DAY'],['action','A writer opens a notebook beside a cooling cup of coffee.'],['character','SARAH'],['dialogue','Every story starts somewhere.']],
+ 'episode': [['scene-heading','INT. APARTMENT - MORNING'],['action','A phone rings. Nobody answers.'],['character','ALEX'],['dialogue','That is the third call today.']],
+ 'rt-film': [['scene-heading','EXT. BUS STOP - NIGHT'],['action','Two strangers wait under a flickering light.'],['character','JAMIE'],['dialogue','Is it still coming?']],
+ 'stage-play': [['scene-heading','ACT I — A SMALL ROOM'],['action','Two chairs. A letter between them.'],['character','MORGAN'],['dialogue','You should read it first.']]
 };
-
-
-// Event Listeners
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("adding listeners");
-
-    // Formatting buttons
-    document.querySelectorAll('.format-btn').forEach(button => {
-        button.addEventListener('click', (e) => applyFormatting(e.target.textContent));
-    });    
-
-    document.querySelector('.play-dialogue').addEventListener('click', playDialogue)
-    
-    // Navigation buttons
-    document.querySelector('.btn-primary').addEventListener('click', createNewScript);
-    document.querySelector('.btn-success').addEventListener('click', saveScript);
-    document.querySelector('.btn-secondary').addEventListener('click', exportToPDF);
-    // document.querySelector('.add-character').addEventListener('click', addCharacterProfile);
-    // Font controls
-    document.querySelector('.font-select').addEventListener('change', changeFont);
-    document.querySelector('.font-size').addEventListener('click', changeFontSize);
-
-    document.addEventListener('click', function(event) {
-        const scriptPage = document.querySelector('.script-page');
-    
-        if (!scriptPage) {
-            console.error("Error: .script-page not found!");
-            return;
-        }
-    
-        // Check if a valid button was clicked
-        let textToInsert = '';
-    
-        if (event.target.classList.contains('feature-film')) {
-            textToInsert = `
-            INT./EXT. LOCATION - TIME
-    
-            Feature films are typically formatted in a three-act structure, with the first 10 to 15 pages being dedicated to setting up the story. Begin by describing the world and introducing any key characters present in the opening scene.  
-    
-            For example….
-    
-            The fluorescent light flickered as JAMES(20s) walked down the alleyway. With every step he took, the sound of sweet jazz grew louder.
-    
-            JAMES
-            Without a fail.
-    
-            Now at the end of the alley, he stands by watching LORENA(30s) from across the street.
-            `;
-            console.log("Feature Film Clicked");
-        } 
-        else if (event.target.classList.contains('episode')) {
-            textToInsert = `
-            INT./EXT. LOCATION - TIME
-    
-            TV show structures depend on the runtime and genre. Hour-long dramas follow the five-act structure while half-hour sitcoms follow the four-act structure. All shows begin with a teaser, a short scene that sets up the problem the episode is going to follow.  
-    
-            For example….
-    
-            The fluorescent light flickered as JAMES(20s) walked down the alleyway. With every step he took, the sound of sweet jazz grew louder.
-    
-            JAMES
-            Without a fail.
-    
-            Now at the end of the alley, he stands by watching LORENA(30s) from across the street. Stepping on gum, he looks back to see she’s gone.
-            `;
-            console.log("TV Show Episode Clicked");
-        } 
-        else if (event.target.classList.contains('rt-film')) {
-            textToInsert = `
-            INT./EXT. LOCATION - TIME
-    
-            Short films are typically formatted in a three-act structure, with act 1 being 25% of the story, act 2 50% of the story, and act 3 the remaining 25%. The first five pages are crucial in establishing the world and introducing most key characters.  
-    
-            For example….
-    
-            The fluorescent light flickered as JAMES(20s) walked down the alleyway. With every step he took, the sound of sweet jazz grew louder.
-    
-            JAMES
-            Without a fail.
-    
-            Now at the end of the alley, he stands by watching LORENA(30s) from across the street. She sits at a table with JANE(30s), her best friend.
-            `;
-            console.log("Short Film Clicked");
-        } 
-        else if (event.target.classList.contains('stage-play')) {
-            textToInsert = `
-            INT./EXT. LOCATION - TIME
-    
-            Plays typically have three acts and have one set location. There is less emphasis on action and more of a focus on dialogue.  
-    
-            For example….
-    
-            JAMES(20s) enters the stage. With every step, the sound of sweet jazz grows louder. He enters the bar.
-    
-            JAMES
-            Without a fail.
-    
-            LORENA
-            Thought you weren’t coming.
-    
-            JAMES
-            Thought you weren’t singing.
-    
-            He sits.
-            `;
-            console.log("Stage Play Clicked");
-        }
-    
-        // If a valid button was clicked, insert text
-        if (textToInsert) {
-            scriptPage.innerText = textToInsert.trim(); // Insert text into the script area
-        }
-    });
-    
-    // document.addEventListener('click', function(event) {
-    //     const scriptPage = document.querySelector('.script-page');
-
-    //     if(!scriptPage.contains(event.target)) {
-    //         console.log("Element clicked outside script page");
-    //         return;
-    //     }   
-
-    //     // Insert text based on element clicked
-    //     let textToInsert = ''; // Initialize variable for text insertion
-    //     if (event.target.classList.contains('feature-film')) {
-    //         textToInsert = `
-    //         INT./EXT. LOCATION - TIME
-    
-    //         Feature films are typically formatted in a three-act structure, with the first 10 to 15 pages being dedicated to setting up the story. Begin by describing the world and introducing any key characters present in the opening scene.  
-    
-    //         For example….
-    
-    //         The fluorescent light flickered as JAMES(20s) walked down the alleyway. With every step he took, the sound of sweet jazz grew louder.
-    
-    //         JAMES
-    //         Without a fail.
-    
-    //         Now at the end of the alley, he stands by watching LORENA(30s) from across the street.
-    //         `;
-    //         console.log("Feature Film Clicked:", event.target);
-    //     }
-
-    
-    //     if (event.target.classList.contains('episode')) {
-    //         // hereee
-    //         console.log("Element clicked hereee:", event.target);
-    //     }
-
-    //     if (event.target.classList.contains('rt-film')) {
-    //         // hereee
-    //         console.log("Element clicked hereee:", event.target);
-    //     }
-
-    //     if (event.target.classList.contains('stage-play')) {
-    //         // hereee
-    //         console.log("Element clicked hereee:", event.target);
-    //     }
-    // });
-
-});
-
-// Add Character Profile
-function addCharacterProfile() {
-    const characterName = prompt('Enter character name:');
-    if (!characterName) return;
-    
-    const characterBio = prompt('Enter character bio:');
-    const imageUrl = prompt('Enter character image URL:');
-    
-    documentState.characters.push({ name: characterName, bio: characterBio, image: imageUrl });
-    renderCharacterProfiles();
+function message(text) { status.textContent = text; }
+function stopPlayback() { if ('speechSynthesis' in window) speechSynthesis.cancel(); }
+function getBlocks() {
+ return Array.from(editor.childNodes).map(el => ({type:TYPES.has(el.className)?el.className:'action',text:el.textContent})).filter(block=>block.text.trim());
 }
-
-function renderCharacterProfiles() {
-    const sidebar = document.querySelector('.characters-sidebar');
-    sidebar.innerHTML = '<h2 class="sidebar-heading">Characters</h2>';
-    documentState.characters.forEach(char => {
-        const charElement = document.createElement('div');
-        charElement.className = 'character-profile';
-        charElement.innerHTML = `
-            <img src="${char.image}" alt="${char.name}" class="character-image" />
-            <h3>${char.name}</h3>
-            <p>${char.bio}</p>
-        `;
-        sidebar.appendChild(charElement);
-    });
+function outline() {
+ const list = document.querySelector('.scene-outline'); list.replaceChildren();
+ editor.querySelectorAll('.scene-heading').forEach((el,i) => {
+  const li=document.createElement('li'), btn=document.createElement('button');
+  btn.textContent=el.innerText || `Scene ${i+1}`;
+  btn.addEventListener('click',()=>{el.scrollIntoView({block:'center'});editor.focus();});
+  li.appendChild(btn);list.appendChild(li);
+ });
 }
-
-// AI Voice Acting for Dialogue
-function playDialogue() {
-    documentState.content = document.querySelector('.script-page').textContent;
-    console.log(documentState.content);
-    const utterance = new SpeechSynthesisUtterance(documentState.content);
-
-    // TODO: Select a voice based on character
-    const voices = speechSynthesis.getVoices();
-    utterance.voice = voices[0]; 
-
-     // Speak the text
-    speechSynthesis.speak(utterance);
+function render(items) {
+ editor.replaceChildren();
+ items.forEach(item=>{const el=document.createElement('div');el.className=TYPES.has(item.type)?item.type:'action';el.textContent=item.text;editor.appendChild(el);});
+ outline();
 }
-
-// Button functions
-function createNewScript() {
-    if (documentState.isDirty) {
-        if (confirm('You have unsaved changes. Create new script anyway?')) {
-            clearDocument();
-        }
-    } else {
-        clearDocument();
-    }
+function changed() { dirty=true;message('Unsaved changes');outline(); }
+function canReplace() { return !dirty || confirm('Discard unsaved changes?'); }
+function recent() {
+ const list=document.querySelector('.recent-scripts');list.replaceChildren();
+ const entries=Object.entries(documents).sort((a,b)=>b[1].updated.localeCompare(a[1].updated));
+ if (!entries.length) {const li=document.createElement('li');li.textContent='No saved scripts yet';list.appendChild(li);}
+ entries.forEach(([id,doc])=>{
+  const li=document.createElement('li'),btn=document.createElement('button');btn.textContent=doc.title;
+  btn.addEventListener('click',()=>{
+   if(!canReplace())return;stopPlayback();currentId=id;title.value=doc.title;notes.value=doc.notes;
+   render(doc.blocks);document.querySelector('.font-select').value=doc.font;editor.style.fontFamily=doc.font+', Courier, monospace';
+   editor.style.fontSize=doc.fontSize;document.querySelector('.font-size').textContent=doc.fontSize;
+   dirty=false;message('Loaded saved script');
+  });li.appendChild(btn);list.appendChild(li);
+ });
 }
-
-function saveScript() {
-    // Simulate saving
-    console.log('Saving script...');
-    alert('Script saved successfully!');
-    documentState.isDirty = false;
+function newScript() {
+ if(!canReplace())return;stopPlayback();currentId=null;title.value='Untitled Script';notes.value='';
+ render([{type:'scene-heading',text:'INT. LOCATION - DAY'},{type:'action',text:'Begin your scene here.'}]);changed();
 }
-
-function exportToPDF() {
-    // Simulate PDF export
-    console.log('Exporting to PDF...');
-    alert('PDF exported successfully!');
+function save() {
+ const id=currentId || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()));
+ const next={...documents,[id]:{title:title.value.trim()||'Untitled Script',notes:notes.value,blocks:getBlocks(),font:document.querySelector('.font-select').value,fontSize:document.querySelector('.font-size').textContent,updated:new Date().toISOString()}};
+ try {localStorage.setItem(KEY,JSON.stringify(next));documents=next;currentId=id;dirty=false;recent();message('Saved in this browser');}
+ catch(error) {message('Browser storage unavailable. Download a backup instead.');console.error('Local save failed',error);}
 }
-
-function changeFont(e) {
-    documentState.currentFont = e.target.value;
-    document.querySelector('.script-page').style.fontFamily = documentState.currentFont;
+function backup() {
+ const data={title:title.value,notes:notes.value,blocks:getBlocks()};
+ const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+ const link=document.createElement('a');link.href=url;link.download=(data.title.replace(/[^a-z0-9]/gi,'_')||'script')+'.json';
+ document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);message('Downloaded JSON backup');
 }
-
-function changeFontSize() {
-    // Toggle between common screenplay font sizes
-    const sizes = ['12pt', '14pt', '16pt'];
-    let currentIndex = sizes.indexOf(documentState.fontSize);
-    documentState.fontSize = sizes[(currentIndex + 1) % sizes.length];
-    document.querySelector('.font-size').textContent = documentState.fontSize;
-    document.querySelector('.script-page').style.fontSize = documentState.fontSize;
+function format(label) {
+ const type=label.toLowerCase().replaceAll(' ','-');if(!TYPES.has(type))return;
+ const selection=window.getSelection();const node=selection.anchorNode;let el=node&&(node.nodeType===1?node:node.parentElement);
+ while(el && el.parentElement!==editor)el=el.parentElement;
+ if(el && editor.contains(el))el.className=type;
+ else {el=document.createElement('div');el.className=type;el.textContent=({'scene-heading':'INT. LOCATION - DAY','action':'Describe the action.','character':'CHARACTER','dialogue':'Write dialogue here.','parenthetical':'(quietly)','transition':'CUT TO:'})[type];editor.appendChild(el);}
+ editor.focus();const range=document.createRange();range.selectNodeContents(el);range.collapse(false);selection.removeAllRanges();selection.addRange(range);changed();
 }
-
-// Formatting functions
-function applyFormatting(formatType) {
-    console.log(formatType);
-    const scriptPage = document.querySelector('.script-page');
-    const selection = window.getSelection();
-    
-    if (!selection.toString()) {
-        // If no text is selected, create new element
-        const newElement = document.createElement('div');
-        newElement.className = formatType.toLowerCase().replace(' ', '-');
-        newElement.contentEditable = true;
-        
-        switch(formatType) {
-            case 'Scene Heading':
-                newElement.textContent = 'INT. LOCATION - TIME';
-                break;
-            case 'Character':
-                newElement.textContent = 'CHARACTER NAME';
-                break;
-            case 'Dialogue':
-                newElement.textContent = 'Character dialogue goes here...';
-                break;
-            case 'Parenthetical':
-                newElement.textContent = '(action)';
-                break;
-            case 'Action':
-                newElement.textContent = 'Action description goes here...';
-                break;
-            case 'Transition':
-                newElement.textContent = 'CUT TO:';
-                break;
-        }
-        
-        console.log(newElement)
-        scriptPage.appendChild(newElement);
-        setCaretToEnd(newElement);
-        console.log(scriptPage);
-    }
+function play() {
+ if(!('speechSynthesis' in window)){message('Text-to-speech unavailable in this browser.');return;}
+ stopPlayback();if(!editor.innerText.trim()){message('Write some text first.');return;}
+ const utterance=new SpeechSynthesisUtterance(editor.innerText);
+ const voices=speechSynthesis.getVoices();if(voices.length)utterance.voice=voices.find(v=>v.default)||voices[0];
+ utterance.onend=()=>message(dirty?'Unsaved changes':'Playback finished');
+ utterance.onerror=e=>message(['canceled','interrupted'].includes(e.error)?'Playback stopped':'Playback unavailable. Check browser voice availability.');
+ speechSynthesis.speak(utterance);message('Reading with browser text-to-speech');
 }
-
-// Utility functions
-function clearDocument() {
-    document.querySelector('.script-page').innerHTML = '';
-    documentState.content = '';
-    documentState.isDirty = false;
-}
-
-function setCaretToEnd(element) {
-    const range = document.createRange();
-    const selection = window.getSelection();
-    range.selectNodeContents(element);
-    range.collapse(false);
-    selection.removeAllRanges();
-    selection.addRange(range);
-    element.focus();
-}
-
-// Track changes
-document.querySelector('.script-page').addEventListener('input', () => {
-    documentState.isDirty = true;
-    // documentState.content = document.querySelector('.script-page').textContent;
-});
+editor.addEventListener('input',changed);notes.addEventListener('input',changed);title.addEventListener('input',changed);
+window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
+document.querySelector('.btn-primary').addEventListener('click',newScript);
+document.querySelector('.btn-success').addEventListener('click',save);
+document.querySelector('.btn-secondary').addEventListener('click',()=>{document.title=title.value.trim()||"Director's Cut";window.print();});
+document.querySelector('#download-backup').addEventListener('click',backup);
+document.querySelector('.play-dialogue').addEventListener('click',play);
+document.querySelector('#stop-dialogue').addEventListener('click',stopPlayback);
+document.querySelectorAll('.format-btn').forEach(btn=>btn.addEventListener('click',()=>format(btn.textContent)));
+Object.keys(templates).forEach(type=>document.querySelector('.'+type).addEventListener('click',()=>{
+ if(!canReplace())return;stopPlayback();currentId=null;title.value='Untitled Script';notes.value='';
+ render(templates[type].map(([type,text])=>({type,text})));changed();
+}));
+document.querySelector('.font-select').addEventListener('change',e=>{editor.style.fontFamily=e.target.value+', Courier, monospace';changed();});
+document.querySelector('.font-size').addEventListener('click',e=>{const sizes=['12pt','14pt','16pt'];const next=sizes[(sizes.indexOf(e.target.textContent)+1)%sizes.length];e.target.textContent=next;editor.style.fontSize=next;changed();});
+try {documents=JSON.parse(localStorage.getItem(KEY)||'{}');if(!documents||typeof documents!=='object')documents={};}
+catch {documents={};message('Saved browser data could not be loaded.');}
+recent();outline();

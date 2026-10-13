@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Director‘s Cut - Online Screenwriting</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <title>Director's Cut — Screenwriting</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-gray-100">
+<body>
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="container nav-content">
             <div class="nav-left">
-                <h1 class="logo">Director‘s Cut</h1>
+                <h1 class="logo">Director’s Cut</h1>
                 <button class="btn btn-primary">New Script</button>
                 <button class="btn btn-success">Save</button>
-                <button class="btn btn-secondary">Export PDF</button>
+                <button class="btn btn-secondary">Print / PDF</button>
+                <button class="btn" id="download-backup">Download Backup</button>
             </div>
             <div class="nav-right">
                 <select class="font-select">
                     <option>Courier New</option>
-                    <option>Courier Prime</option>
+                    <option>monospace</option>
                 </select>
                 <button class="font-size">12pt</button>
             </div>
@@ -33,21 +33,20 @@
         <aside class="sidebar templates-sidebar">
             <h2 class="sidebar-heading">Templates</h2>
             <ul class="template-list">
-                <li class="feature-film">Feature Film</li>
-                <li class="episode">TV Episode</li>
-                <li class="rt-film">Short Film</li>
-                <li class="stage-play">Stage Play</li>
+                <li><button class="feature-film">Feature Film</button></li>
+                <li><button class="episode">TV Episode</button></li>
+                <li><button class="rt-film">Short Film</button></li>
+                <li><button class="stage-play">Stage Play</button></li>
             </ul>
             
             <h2 class="sidebar-heading">Recent Scripts</h2>
             <ul class="recent-scripts">
-                <li>Untitled Project</li>
-                <li>My First Script</li>
             </ul>
         </aside>
 
         <!-- Main Editor Area -->
         <main class="editor-area">
+            <div class="document-heading"><label for="script-title">Script title</label><input id="script-title" value="Untitled Script"><span id="save-status" role="status" aria-live="polite">Ready to write</span></div>
             <!-- Formatting Toolbar -->
             <div class="format-toolbar">
                 <button class="format-btn">Scene Heading</button>
@@ -57,10 +56,11 @@
                 <button class="format-btn">Parenthetical</button>
                 <button class="format-btn">Transition</button>
                 <button class="play-dialogue">Play Dialogue</button>
+                <button id="stop-dialogue">Stop Playback</button>
             </div>
 
             <!-- Script Page -->
-            <div class="script-page">
+            <div class="script-page" contenteditable="true" role="textbox" aria-label="Screenplay editor" aria-multiline="true" spellcheck="true">
                 <div class="scene-heading">INT. COFFEE SHOP - DAY</div>
                 
                 <div class="action">
@@ -90,13 +90,10 @@
         <!-- Right Sidebar - Notes & Outline -->
         <aside class="sidebar notes-sidebar">
             <h2 class="sidebar-heading">Notes</h2>
-            <textarea class="notes-area" placeholder="Add notes here..."></textarea>
+            <textarea class="notes-area" aria-label="Script notes" placeholder="Add notes here..."></textarea>
             
             <h2 class="sidebar-heading">Scene Outline</h2>
             <ul class="scene-outline">
-                <li>Scene 1 - Coffee Shop Introduction</li>
-                <li>Scene 2 - First Meeting</li>
-                <li class="add-scene">+ Add New Scene</li>
             </ul>
         </aside>
     </div>
