@@ -1,53 +1,32 @@
-# DukeHack
+# Director’s Cut — Screenwriting Web Prototype
 
-# Director’s Cut - Online Screenwriting
+A browser-based screenwriting prototype with screenplay formatting, starter templates, font controls, and text-to-speech playback.
 
-## Overview
-Director’s Cut is a web-based screenwriting application designed to help writers create, format, and manage scripts efficiently. With built-in formatting tools, character management, and AI-powered dialogue playback, Director’s Cut offers a seamless and interactive screenwriting experience.
+## User value
+Help writers draft screenplay elements and listen to text from the editor in one interface.
 
-## Features
-- **Script Formatting:** Automatically format screenplay elements such as scene headings, action, character names, dialogue, parentheticals, and transitions.
-- **Predefined Templates:** Quickly start writing with predefined templates for feature films, TV episodes, short films, and stage plays.
-- **AI Voice Acting:** Utilize text-to-speech synthesis to read dialogue aloud.
-- **Font Customization:** Choose between different fonts and font sizes for better readability.
-- **Scene Organization:** Easily manage and outline scenes in the right sidebar.
-- **Save and Export:** Save scripts or export them as PDFs for easy sharing and printing.
+## Implemented features
+- Editable screenplay elements and formatting buttons.
+- Starter text for feature films, TV episodes, short films, and stage plays.
+- Font family and size controls.
+- Browser speech synthesis that reads the editor's text.
+- Basic document state and an unsaved-change prompt.
 
-## Technologies Used
-- **Frontend:** HTML, CSS, JavaScript
-- **Styling:** Tailwind CSS
-- **Speech Synthesis API:** For AI-powered voice acting
+## Technology
+HTML, CSS, and JavaScript, using DOM events, editable elements, selection/caret APIs, and the browser Speech Synthesis API. Playback uses browser text-to-speech; it is not a generative voice model or character-specific voice system.
 
-## Installation & Usage
-1. Clone the repository:
-   ```sh
-   git clone https://github.com/your-repo/scriptcraft.git
-   ```
-2. Navigate to the project folder:
-   ```sh
-   cd scriptcraft
-   ```
-3. Open `index.html` in a web browser to start using the application.
+## Run locally
+1. Clone this repository.
+2. Open [screenwriting.html](screenwriting.html) in a browser.
+3. Select a template or add formatted elements, edit the text, and use Play Dialogue.
 
-## How to Use
-1. Click **New Script** to start a fresh screenplay.
-2. Use the **formatting toolbar** to structure your script.
-3. Select a **template** to auto-fill formatting guides.
-4. Click **Play Dialogue** to listen to the script with AI voice synthesis.
-5. Manage characters in the **Character Sidebar** by adding profiles.
-6. Save or export your script as a **PDF** for easy sharing.
+Source: [script.js](script.js) · [styles.css](styles.css)
 
-## Contributing
-If you wish to contribute:
-- Fork the repository
-- Create a feature branch (`git checkout -b feature-name`)
-- Commit your changes (`git commit -m 'Add new feature'`)
-- Push to the branch (`git push origin feature-name`)
-- Submit a pull request
+## Prototype limitations
+- Save and PDF export currently display alerts; they do not persist or export a document.
+- Character-profile code exists, but its event binding is commented out.
+- Scene organization and character-specific voice selection are not established as working features.
+- Browser compatibility and a live hosted demo have not been verified.
 
-## License
-This project is licensed under the MIT License.
-
-## Contact
-For any questions or suggestions, feel free to reach out via GitHub or email at `ys454@duke.edu`.
-
+## Project context and attribution
+Duke hackathon portfolio project. Document individual and team contributions before using team-level claims on a resume. No license file is currently included.
